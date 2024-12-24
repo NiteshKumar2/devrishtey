@@ -2,19 +2,18 @@ import mongoose from 'mongoose';
 
 const ProfileSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Linked user ID
-    relationLookingFor: { type: String, enum: ['self', 'sibling', 'relative'], required: true }, // Relation looking for
+    relationLookingFor: { type: String, enum: ['self', 'sibling', 'relative'] }, // Relation looking for
     birthTime: { type: String }, // Time of birth (HH:mm format or string)
-    education: { type: String, required: true }, // Highest education qualification
+    education: { type: String}, // Highest education qualification
     annualSalary: { type: String }, // Salary (e.g., "10-12 LPA")
     partnerPreferences: { type: String }, // Preference for partner
     maritalStatus: {
       type: String,
       enum: ['single', 'divorced', 'widowed'],
-      required: true,
     }, // Marital status
-    fatherName: { type: String, required: true }, // Father's name
+    fatherName: { type: String }, // Father's name
     fatherOccupation: { type: String }, // Father's job or profession
-    avoidGotra: { type: Boolean, default: false }, // Avoid same Gotra
+    avoidGotra: {type: String }, // Avoid same Gotra
     birthAddress: { type: String }, // Place of birth
     profileImage: { type: String }, // Profile picture URL
     dietaryPreference: {
