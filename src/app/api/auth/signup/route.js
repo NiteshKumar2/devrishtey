@@ -3,7 +3,8 @@ import { connect } from "@/models/dbConfig";
 import userModel from "@/models/userModel";
 import bcryptjs from "bcryptjs";
 
-await connect(); // Ensure the database connection is established
+// Ensure the database connection is established
+await connect();
 
 export async function POST(request) {
   try {
@@ -18,21 +19,21 @@ export async function POST(request) {
       jobTitle,
       currentAddress,
       mobileNumber,
-      passwordHash,
+      password,
     } = reqBody;
 
     // Input validation
     if (
       !firstName ||
       !lastName ||
-      !mobileNumber ||
       !gender ||
       !community ||
       !dateOfBirth ||
       !heightInCm ||
       !jobTitle ||
       !currentAddress ||
-      !passwordHash
+      !mobileNumber ||
+      !password
     ) {
       return NextResponse.json(
         { error: "All fields are required" },
@@ -41,18 +42,19 @@ export async function POST(request) {
     }
 
     // Check if user already exists
-    const user = await userModel.findOne({ mobileNumber });
-    if (user) {
+    const existingUser = await userModel.findOne({ mobileNumber });
+    if (existingUser) {
       return NextResponse.json(
-        { error: "User already exists" },
+        { error: "A user with this mobile number already exists" },
         { status: 400 }
       );
     }
 
     // Hash password
     const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(passwordHash, salt);
+    const hashedPassword = await bcryptjs.hash(password, salt);
 
+    // Create a new user
     const newUser = new userModel({
       firstName,
       lastName,
@@ -66,21 +68,27 @@ export async function POST(request) {
       passwordHash: hashedPassword,
     });
 
+    // Save user to database
     const savedUser = await newUser.save();
-    console.log(savedUser);
 
+    // Return success response
     return NextResponse.json(
       {
         message: "User created successfully",
         success: true,
-        savedUser,
+        user: {
+          id: savedUser._id,
+          firstName: savedUser.firstName,
+          lastName: savedUser.lastName,
+          mobileNumber: savedUser.mobileNumber,
+        },
       },
       { status: 201 }
-    ); // Return 201 for successful resource creation
+    );
   } catch (error) {
-    console.error("Error during user registration:", error); // Log the error for debugging
+    console.error("Error during user registration:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

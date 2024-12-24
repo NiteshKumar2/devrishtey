@@ -10,7 +10,7 @@ export async function connect() {
             throw new Error('User and password must be defined in environment variables.');
         }
 
-        const connectionStr = `mongodb+srv://${user}:${password}@cluster0.3f7rq.mongodb.net/userDB?retryWrites=true&w=majority&appName=Cluster0`;
+        const connectionStr = `mongodb+srv://${user}:${password}@cluster0.3f7rq.mongodb.net/rishteyDB?retryWrites=true&w=majority&appName=Cluster0`;
 
         await mongoose.connect(connectionStr);
         isConnected = true;
