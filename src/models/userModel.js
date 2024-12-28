@@ -15,6 +15,17 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  otpSend: {
+    type: String,
+    enum: [
+      "initiateverify",
+      "processverify",
+      "initiateforgot",
+      "processforgot",
+    ],
+    default: null, // Allows otpSend to be null by default
+    required: false, // Mark as not required
+  }, //initiateverify", "processverify","initiateforgot","processforgot
   forgotPasswordToken: String,
   forgotPasswordTokenExpiry: Date,
   verifyToken: String,

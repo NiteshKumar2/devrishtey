@@ -1,19 +1,19 @@
 import { connect } from "@/models/dbConfig";
 import userModel from "@/models/userModel";
 import { NextResponse } from "next/server";
-
+import bcryptjs from "bcryptjs";
 // Ensure the database connection is established
 await connect();
 
 export async function PUT(request) {
   try {
     const reqBody = await request.json();
-    const { mobileNumber, token } = reqBody;
+    const { mobileNumber, oldpassword, newpassword } = reqBody;
 
     // Input validation
-    if (!mobileNumber || !token) {
+    if (!mobileNumber || !oldpassword || !newpassword) {
       return NextResponse.json(
-        { error: "mobileNumber and token are required" },
+        { error: "mobileNumber,old password and new password are required" },
         { status: 400 }
       );
     }
@@ -21,36 +21,44 @@ export async function PUT(request) {
     console.log("Verifying token for mobileNumber:", mobileNumber);
 
     // Find the user with the provided mobileNumber, token, and valid token expiry
-    const user = await userModel.findOne({
-      mobileNumber,
-      verifyToken: token,
-      verifyTokenExpiry: { $gt: Date.now() }, // Ensure token is not expired
-    });
-
+    const user = await userModel.findOne({ mobileNumber });
     if (!user) {
-      console.error("Invalid token or user not found");
       return NextResponse.json(
-        { error: "Invalid or expired token" },
+        { error: "Invalid mobile number or old password" },
+        { status: 400 }
+      );
+    }
+
+    // Check if password is correct
+    const validPassword = await bcryptjs.compare(
+      oldpassword,
+      user.passwordHash
+    );
+    if (!validPassword) {
+      return NextResponse.json(
+        { error: "Invalid mobile number or old password" },
         { status: 400 }
       );
     }
 
     console.log("User found:", user.mobileNumber);
 
+    // Hash password
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(newpassword, salt);
+
     // Update user verification status
-    user.isVerified = true;
-    user.verifyToken = undefined; // Clear the verification token
-    user.verifyTokenExpiry = undefined; // Clear the token expiry
-    user.otpSend = undefined; // Assign a valid default or null value to otpSend
+
+    user.passwordHash = hashedPassword;
     await user.save();
 
     // Return success response
     return NextResponse.json({
-      message: "Mobile number verified successfully",
+      message: "password reset successfully",
       success: true,
     });
   } catch (error) {
-    console.error("Error during mobileNumber verification:", error);
+    console.error("Error during password reset:", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },
       { status: 500 }

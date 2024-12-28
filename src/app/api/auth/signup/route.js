@@ -66,6 +66,7 @@ export async function POST(request) {
       currentAddress,
       mobileNumber,
       passwordHash: hashedPassword,
+      otpSend: "initiateverify",
     });
 
     // Save user to database

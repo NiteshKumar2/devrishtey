@@ -1,19 +1,19 @@
 import { connect } from "@/models/dbConfig";
 import userModel from "@/models/userModel";
 import { NextResponse } from "next/server";
-
+import bcryptjs from "bcryptjs";
 // Ensure the database connection is established
 await connect();
 
 export async function PUT(request) {
   try {
     const reqBody = await request.json();
-    const { mobileNumber, token } = reqBody;
+    const { mobileNumber, token, password } = reqBody;
 
     // Input validation
-    if (!mobileNumber || !token) {
+    if (!mobileNumber || !token || !password) {
       return NextResponse.json(
-        { error: "mobileNumber and token are required" },
+        { error: "mobileNumber, password and token are required" },
         { status: 400 }
       );
     }
@@ -23,8 +23,8 @@ export async function PUT(request) {
     // Find the user with the provided mobileNumber, token, and valid token expiry
     const user = await userModel.findOne({
       mobileNumber,
-      verifyToken: token,
-      verifyTokenExpiry: { $gt: Date.now() }, // Ensure token is not expired
+      forgotPasswordToken: token,
+      forgotPasswordTokenExpiry: { $gt: Date.now() }, // Ensure token is not expired
     });
 
     if (!user) {
@@ -37,20 +37,25 @@ export async function PUT(request) {
 
     console.log("User found:", user.mobileNumber);
 
+    // Hash password
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(password, salt);
+
     // Update user verification status
     user.isVerified = true;
-    user.verifyToken = undefined; // Clear the verification token
-    user.verifyTokenExpiry = undefined; // Clear the token expiry
-    user.otpSend = undefined; // Assign a valid default or null value to otpSend
+    user.forgotPasswordToken = undefined; // Clear the verification token
+    user.forgotPasswordTokenExpiry = undefined; // Clear the token expiry
+    user.otpSend = undefined;
+    user.passwordHash = hashedPassword;
     await user.save();
 
     // Return success response
     return NextResponse.json({
-      message: "Mobile number verified successfully",
+      message: "password reset successfully",
       success: true,
     });
   } catch (error) {
-    console.error("Error during mobileNumber verification:", error);
+    console.error("Error during password reset:", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },
       { status: 500 }
