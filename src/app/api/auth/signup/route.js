@@ -94,3 +94,72 @@ export async function POST(request) {
     );
   }
 }
+
+export async function PUT(request) {
+  try {
+    const reqBody = await request.json();
+    const {
+      mobileNumber,
+      firstName,
+      lastName,
+      gender,
+      community,
+      dateOfBirth,
+      heightInCm,
+      jobTitle,
+      currentAddress,
+    } = reqBody;
+
+    // Input validation
+    if (!mobileNumber) {
+      return NextResponse.json(
+        { error: "Mobile number is required to update user details" },
+        { status: 400 }
+      );
+    }
+
+    // Find the user by mobile number
+    const existingUser = await userModel.findOne({ mobileNumber });
+    if (!existingUser) {
+      return NextResponse.json(
+        { error: "User with this mobile number does not exist" },
+        { status: 404 }
+      );
+    }
+
+    // Update user details
+    if (firstName) existingUser.firstName = firstName;
+    if (lastName) existingUser.lastName = lastName;
+    if (gender) existingUser.gender = gender;
+    if (community) existingUser.community = community;
+    if (dateOfBirth) existingUser.dateOfBirth = dateOfBirth;
+    if (heightInCm) existingUser.heightInCm = heightInCm;
+    if (jobTitle) existingUser.jobTitle = jobTitle;
+    if (currentAddress) existingUser.currentAddress = currentAddress;
+
+    // Save the updated user details
+    const updatedUser = await existingUser.save();
+
+    // Return success response
+    return NextResponse.json(
+      {
+        message: "User updated successfully",
+        success: true,
+        user: {
+          id: updatedUser._id,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          mobileNumber: updatedUser.mobileNumber,
+        },
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error during user update:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
