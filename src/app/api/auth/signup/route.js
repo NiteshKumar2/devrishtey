@@ -18,6 +18,7 @@ export async function POST(request) {
       heightInCm,
       jobTitle,
       currentAddress,
+      maritalStatus,
       mobileNumber,
       password,
     } = reqBody;
@@ -32,6 +33,7 @@ export async function POST(request) {
       !heightInCm ||
       !jobTitle ||
       !currentAddress ||
+      !maritalStatus ||
       !mobileNumber ||
       !password
     ) {
@@ -64,6 +66,7 @@ export async function POST(request) {
       heightInCm,
       jobTitle,
       currentAddress,
+      maritalStatus,
       mobileNumber,
       passwordHash: hashedPassword,
       otpSend: "initiateverify",
@@ -107,6 +110,7 @@ export async function PUT(request) {
       dateOfBirth,
       heightInCm,
       jobTitle,
+      maritalStatus,
       currentAddress,
     } = reqBody;
 
@@ -136,6 +140,7 @@ export async function PUT(request) {
     if (heightInCm) existingUser.heightInCm = heightInCm;
     if (jobTitle) existingUser.jobTitle = jobTitle;
     if (currentAddress) existingUser.currentAddress = currentAddress;
+    if (maritalStatus) existingUser.maritalStatus = maritalStatus;
 
     // Save the updated user details
     const updatedUser = await existingUser.save();
@@ -162,4 +167,3 @@ export async function PUT(request) {
     );
   }
 }
-

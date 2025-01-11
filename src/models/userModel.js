@@ -10,6 +10,10 @@ const UserSchema = new mongoose.Schema({
   jobTitle: { type: String, required: true }, // Current job or designation
   currentAddress: { type: String, required: true }, // Current living address
   mobileNumber: { type: String, unique: true, required: true }, // Mobile number
+  maritalStatus: {
+    type: String,
+    enum: ["single", "divorced", "widowed"],
+  }, // Marital status
   isVerified: { type: Boolean, default: false }, // Mobile/Email verification status
   isAdmin: {
     type: Boolean,

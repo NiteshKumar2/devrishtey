@@ -7,10 +7,6 @@ const ProfileSchema = new mongoose.Schema({
     education: { type: String}, // Highest education qualification
     annualSalary: { type: String }, // Salary (e.g., "10-12 LPA")
     partnerPreferences: { type: String }, // Preference for partner
-    maritalStatus: {
-      type: String,
-      enum: ['single', 'divorced', 'widowed'],
-    }, // Marital status
     fatherName: { type: String }, // Father's name
     fatherOccupation: { type: String }, // Father's job or profession
     avoidGotra: {type: String }, // Avoid same Gotra
